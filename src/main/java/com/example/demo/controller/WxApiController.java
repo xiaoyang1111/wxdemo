@@ -1,6 +1,7 @@
 package com.example.demo.controller;
 
 import com.example.demo.util.WxUtil;
+import com.example.demo.util.XMLUtil;
 import org.dom4j.Document;
 import org.dom4j.Element;
 import org.dom4j.io.SAXReader;
@@ -13,14 +14,8 @@ import javax.servlet.ServletInputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.PrintWriter;
-import java.util.Enumeration;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import static org.springframework.data.repository.init.ResourceReader.Type.JSON;
+import java.util.*;
 
 @RestController
 @RequestMapping("/wx/")
@@ -40,8 +35,8 @@ public class WxApiController {
         }
         System.out.println("get");
     }
-    @PostMapping("getToken")
-    public void  getToken1(HttpServletRequest request, HttpServletResponse response){
+    @PostMapping(value = "getToken",produces = "application/xml; charset=utf-8")
+    public String  getToken1(HttpServletRequest request, HttpServletResponse response){
         try {
             Enumeration<String> stringEnumeration = request.getParameterNames();
             while(stringEnumeration.hasMoreElements()){
@@ -60,9 +55,17 @@ public class WxApiController {
             for (Element element : list) {
                 map.put(element.getName(), element.getStringValue());
             }
-
+            Map<String,Object> responseMap = new HashMap<>();
+            responseMap.put("ToUserName",map.get("FromUserName"));
+            responseMap.put("FromUserName",map.get("ToUserName"));
+            responseMap.put("CreateTime",new Date().getTime());
+            responseMap.put("MsgType","text");
+            responseMap.put("Content","你好");
+            String reMes = XMLUtil.toXml(responseMap,"xml",true);
+            return reMes;
         } catch (Exception e) {
             e.printStackTrace();
         }
+        return null;
     }
 }

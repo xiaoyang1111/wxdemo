@@ -37,7 +37,7 @@ public class XMLUtil {
      * * 实体对象转成Map
      * * @param obj 实体对象
      * * @return
-     *
+     *      
      */
     public static Map<String, Object> object2Map(Object obj) {
         Map<String, Object> map = new HashMap<>();
