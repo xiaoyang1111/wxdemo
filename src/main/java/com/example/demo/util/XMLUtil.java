@@ -10,6 +10,13 @@ import java.util.*;
 
 public class XMLUtil {
 
+    /**
+     * map转xml
+     * @param params
+     * @param rootElement
+     * @param cdata
+     * @return
+     */
     public static String toXml(Map<String, Object> params, String rootElement, boolean cdata) {
         StringBuilder buf = new StringBuilder();
         List<String> keys = new ArrayList(params.keySet());
