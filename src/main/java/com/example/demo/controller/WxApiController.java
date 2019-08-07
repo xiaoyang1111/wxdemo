@@ -4,6 +4,7 @@ import com.example.demo.entity.ImageMessage;
 import com.example.demo.entity.TextMessage;
 import com.example.demo.util.WxUtil;
 import com.example.demo.util.XMLUtil;
+import lombok.extern.slf4j.Slf4j;
 import org.dom4j.Document;
 import org.dom4j.Element;
 import org.dom4j.io.SAXReader;
@@ -21,6 +22,7 @@ import java.util.*;
 
 @RestController
 @RequestMapping("/wx/")
+@Slf4j
 public class WxApiController {
 
     @GetMapping("getToken")
@@ -51,14 +53,7 @@ public class WxApiController {
             for (Element element : list) {
                 map.put(element.getName(), element.getStringValue());
             }
-            System.out.println(map);
-//            Map<String,Object> responseMap = new HashMap<>();
-//            responseMap.put("ToUserName",map.get("FromUserName"));
-//            responseMap.put("FromUserName",map.get("ToUserName"));
-//            responseMap.put("CreateTime",new Date().getTime());
-//            responseMap.put("MsgType","text");
-//            responseMap.put("Content","你好");
-
+           log.info("requestMessage"+map);
             TextMessage imageMessage = TextMessage.builder()
                     .CreateTime(new Date().getTime())
                     .FromUserName(map.get("ToUserName"))
@@ -67,7 +62,7 @@ public class WxApiController {
                     .Content("你好")
                     .build();
             Map  responseMap = XMLUtil.object2Map(imageMessage);
-            System.out.println(responseMap);
+            log.info("responseMessage"+map);
             String reMes = XMLUtil.toXml(responseMap,"xml",true);
             return reMes;
         } catch (Exception e) {
