@@ -1,7 +1,6 @@
 package com.example.demo.controller;
 
-import com.example.demo.entity.ImageMessage;
-import com.example.demo.entity.TextMessage;
+import com.example.demo.entity.message.TextMessage;
 import com.example.demo.util.WxUtil;
 import com.example.demo.util.XMLUtil;
 import lombok.extern.slf4j.Slf4j;
@@ -62,6 +61,7 @@ public class WxApiController {
                     .Content("你好")
                     .build();
             Map  responseMap = XMLUtil.object2Map(imageMessage);
+            WxUtil.createMenu();
             log.info("responseMessage"+map);
             String reMes = XMLUtil.toXml(responseMap,"xml",true);
             return reMes;

@@ -1,4 +1,4 @@
-package com.example.demo.entity;
+package com.example.demo.entity.message;
 
 import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
@@ -10,15 +10,15 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class VideoMessage {
+public class ArticlesMessage {
     @ApiModelProperty("接收方帐号")
     private String ToUserName;
     @ApiModelProperty("开发者微信号")
     private String FromUserName;
     @ApiModelProperty("消息创建时间 （整型）")
     private String CreateTime;
-    @ApiModelProperty("消息类型，语音为voice")
+    @ApiModelProperty("消息类型，文本为text")
     private String MsgType;
-    @ApiModelProperty("通过素材管理中的接口上传多媒体文件，得到的id")
-    private String MediaId;
+    @ApiModelProperty("回复的消息内容")
+    private String Content;
 }
