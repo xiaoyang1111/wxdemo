@@ -1,6 +1,8 @@
 package com.example.demo.controller;
 
+import com.alibaba.fastjson.JSON;
 import com.example.demo.entity.message.TextMessage;
+import com.example.demo.util.ShunTentWxUtil;
 import com.example.demo.util.WxUtil;
 import com.example.demo.util.XMLUtil;
 import lombok.extern.slf4j.Slf4j;
@@ -52,17 +54,17 @@ public class WxApiController {
             for (Element element : list) {
                 map.put(element.getName(), element.getStringValue());
             }
-           log.info("requestMessage"+map);
+           log.info("requestMessage"+ JSON.toJSONString(map));
+            String responseMes =  ShunTentWxUtil.event(map);
             TextMessage imageMessage = TextMessage.builder()
                     .CreateTime(new Date().getTime())
                     .FromUserName(map.get("ToUserName"))
                     .MsgType("text")
                     .ToUserName(map.get("FromUserName"))
-                    .Content("你好")
+                    .Content(responseMes)
                     .build();
             Map  responseMap = XMLUtil.object2Map(imageMessage);
-            WxUtil.createMenu();
-            log.info("responseMessage"+map);
+            log.info("responseMessage:"+JSON.toJSONString(responseMap));
             String reMes = XMLUtil.toXml(responseMap,"xml",true);
             return reMes;
         } catch (Exception e) {

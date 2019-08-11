@@ -7,15 +7,11 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Data
-@Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class AbstractButton {
+@Builder
+public class ClickChildButton extends ChildButton{
 
-    @ApiModelProperty("按钮名称")
-    private String name;
-    @ApiModelProperty("按钮类型")
-    private String type;
-    @ApiModelProperty("click等点击类型必须")
+    @ApiModelProperty("事件按钮key")
     private String key;
 }

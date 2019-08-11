@@ -6,14 +6,16 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.util.List;
-
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class MenuButton {
-    @ApiModelProperty("button集合")
-    List<SubButton> button;
+public class ViewChildButton extends ChildButton{
+
+    @ApiModelProperty("重定向url")
+    private String url;
+
+    @ApiModelProperty("事件按钮key")
+    private String key;
 
 }
