@@ -89,7 +89,7 @@ public class ShunTentWxUtil {
      * 关注事件处理
      * @return 回复内容
      */
-    public static String event(Map<String,String> map){
+    public static String   event(Map<String,String> map){
         String response = null;
         if(null != map.get("Event") && StringUtils.equals("subscribe",map.get("Event"))){
             //关注事件
