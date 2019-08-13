@@ -1,13 +1,15 @@
 package com.example.demo.util;
 
+import cn.hutool.core.date.DateUtil;
 import com.alibaba.druid.util.StringUtils;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.example.demo.entity.menu.MenuButton;
+import com.example.demo.entity.template.DataValue;
+import com.example.demo.entity.template.SendTemplate;
+import com.example.demo.entity.template.TemplateList;
 import com.github.kevinsawicki.http.HttpRequest;
 import lombok.extern.slf4j.Slf4j;
-
-import javax.swing.*;
 import java.security.MessageDigest;
 import java.util.*;
 
@@ -134,7 +136,7 @@ public class WxUtil {
     /**
      * 设置所属行业
      */
-    private static Boolean setIndustry(Map<String,String> map) {
+    public static Boolean setIndustry(Map<String,String> map) {
         Boolean flat = false;
         log.info("setIndustryRequest:"+JSON.toJSONString(map));
         String url = String.format(API_SET_INDUSTRY, WxUtil.getAccessToken());
@@ -149,6 +151,68 @@ public class WxUtil {
         return flat;
     }
 
+    /**
+     * 获取设置的行业信息
+     * @return
+     */
+    public static String getIndustry(){
+      String url =  String.format(GET_INDUSTRY,WxUtil.getAccessToken());
+      HttpRequest httpRequest = HttpRequest.get(url);
+      String result = httpRequest.body();
+      JSONObject jsonObject = JSON.parseObject(result);
+      log.info("get_industrResponse:"+JSON.toJSONString(jsonObject));
+      return result;
+    }
+
+
+    /**
+     * 获得模板ID
+     * @param template_id_short 模板编号
+     * @return
+     */
+    public static String getTemplate(String template_id_short){
+        String url =  String.format(API_ADD_TEMPLATE,WxUtil.getAccessToken());
+        HttpRequest httpRequest = HttpRequest.post(url);
+        JSONObject jsonObject = new JSONObject();
+        jsonObject.put("template_id_short",template_id_short);
+        log.info("getTemplateResquest:"+JSON.toJSONString(jsonObject));
+        httpRequest.send(JSON.toJSONString(jsonObject));
+        String result = httpRequest.body();
+        JSONObject jsonObject1 = JSON.parseObject(result);
+        log.info("getTemplateREsponse:"+JSON.toJSONString(jsonObject1));
+        String templateId =jsonObject1.getString(template_id_short);
+        return templateId;
+    }
+
+    /**
+     * 发送模板消息
+     * @return
+     */
+    public static Boolean sendTemplate(SendTemplate sendTemplate){
+        Boolean flat = false;
+        String url =  String.format(SEND_TM_MESSAGE,WxUtil.getAccessToken());
+        log.info("sendTemplateRequest:"+JSON.toJSONString(sendTemplate));
+        HttpRequest httpRequest = HttpRequest.post(url);
+
+        httpRequest.send(JSON.toJSONString(sendTemplate));
+        String result = httpRequest.body();
+        log.info("sendTemplateResponse:"+JSON.toJSONString(result));
+        JSONObject jsonObject = JSON.parseObject(result);
+        if(StringUtils.equals("ok",jsonObject.getString("errmsg"))){
+            flat = true;
+        }
+        return flat;
+    }
+
+    /**
+     * 获取模板列表
+     * @return
+     */
+    public static TemplateList getTemplateList(){
+      String url =  String.format(GET_ALL_PRIVATE,getAccessToken());
+      String result = HttpRequest.get(url).body();
+      return (TemplateList) JSON.toJSON(result);
+    }
     /**
      * sha1算法计算摘要
      *
@@ -189,9 +253,16 @@ public class WxUtil {
     }
 
     public static void main(String[] args) {
-        Map<String,String> map = new HashMap<>();
-        map.put("industry_id1","1");
-        map.put("industry_id2","2");
-        WxUtil.setIndustry(map);
+        Map<String, DataValue> map = new HashMap<>();
+        map.put("sendTime",DataValue.builder().color("#173177").value(DateUtil.format(new Date(),"yyyy-MM-dd HH:mm:ss")).build());
+        map.put("toUserName",DataValue.builder().color("#173177").value("你最爱的猪猪").build());
+        map.put("formUserName",DataValue.builder().color("#173177").value("我最爱的大傻猪").build());
+        map.put("content",DataValue.builder().color("#173177").value("猪猪1314520").build());
+        SendTemplate sendTemplate =SendTemplate.builder()
+                .data(map)
+                .template_id("jUIM2mpS_9Jg94-_QH7cmEe1H7dCAmlX3aGAXRa3ZCA")
+                .touser("oyCVg1bMZa4UzRrx1QR7lMxGyZB8")
+                .build();
+        WxUtil.sendTemplate(sendTemplate);
     }
 }
