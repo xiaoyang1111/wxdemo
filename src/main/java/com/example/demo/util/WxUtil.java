@@ -10,6 +10,9 @@ import com.example.demo.entity.template.SendTemplate;
 import com.example.demo.entity.template.TemplateList;
 import com.github.kevinsawicki.http.HttpRequest;
 import lombok.extern.slf4j.Slf4j;
+
+import javax.net.ssl.HttpsURLConnection;
+import javax.servlet.http.HttpServletRequest;
 import java.security.MessageDigest;
 import java.util.*;
 
@@ -22,11 +25,11 @@ public class WxUtil {
     /**
      * appid
      */
-    private static String APPID = "wxc957d81994ad6084";
+    public static String APPID = "wxc957d81994ad6084";
     /**
      * appsecret
      */
-    private static String APPSECRET = "f302feb8a6b31f00ff1efd589cfd2daa";
+    public static String APPSECRET = "f302feb8a6b31f00ff1efd589cfd2daa";
     /**
      * Token
      */
@@ -67,7 +70,26 @@ public class WxUtil {
      * 设置所属行业
      */
     private static String API_SET_INDUSTRY = "https://api.weixin.qq.com/cgi-bin/template/api_set_industry?access_token=%s";
-
+    /**
+     * 获取用户基本信息
+     */
+    private static String GET_USERINFO = "https://api.weixin.qq.com/cgi-bin/user/info?access_token=%s&openid=%s&lang=%s";
+    /**
+     * 网页授权地址
+     */
+    public static String AUTH_REDIRET = "https://open.weixin.qq.com/connect/oauth2/authorize?appid=%s&redirect_uri=%s&response_type=%s&scope=%s&state=%s#wechat_redirect";
+    /**
+     * 获取用户accessToken
+     */
+    public static String GET_USER_ACCESS_TOKEN ="https://api.weixin.qq.com/sns/oauth2/access_token?appid=%s&secret=%s&code=%s&grant_type=authorization_code";
+    /**
+     * 获取网页授权用户基本信息
+     */
+    public static  String GET_AUTH_USERINFO = "https://api.weixin.qq.com/sns/userinfo?access_token=%s&openid=%s&lang=zh_CN";
+    /**
+     * 刷新用户accesstoken
+     */
+    public static  String REFREDH_USER_ACCESSTOKEN = "https://api.weixin.qq.com/sns/oauth2/refresh_token?appid=%s&grant_type=refresh_token&refresh_token=%s";
     /**
      * 获取accesstoken
      *
@@ -164,7 +186,50 @@ public class WxUtil {
       return result;
     }
 
+    /**
+     * 获取用户基本信息
+     * @return
+     */
+    public static String getUserInfo(String oppenId){
+        String url = String.format(GET_USERINFO,WxUtil.getAccessToken(),oppenId,"zh_CN");
+        String result = HttpRequest.get(url).body();
+        JSONObject jsonObject = JSON.parseObject(result);
+        log.info("getUserInfoResponse:"+JSON.toJSONString(jsonObject));
+        return null;
 
+    }
+
+    /**
+     * 拉取用户信息(网页授权）
+     */
+    public static void   getAuthUserInfo(String accessToken,String oppenId){
+        String url = String.format(GET_AUTH_USERINFO,accessToken,oppenId);
+        String result = HttpRequest.get(url).body();
+        log.info("getAuthUserInfoResponse:"+JSON.toJSONString(result));
+    }
+    /**
+     * 获取用户accessToken
+     * @param code
+     * @return
+     */
+    public static  JSONObject getUserAccessToken(String code){
+        String url = String.format(GET_USER_ACCESS_TOKEN,WxUtil.APPID,WxUtil.APPSECRET,code);
+        String result = HttpRequest.get(url).body();
+        JSONObject jsonObject =JSON.parseObject(result);
+        log.info("getUserAccessTokenResponse:"+JSON.toJSONString(result));
+        //刷新accessToken
+        WxUtil.refreshToken(jsonObject.getString("refresh_token"));
+        return jsonObject;
+    }
+
+    /**
+     * 刷新用accessToken
+     * @param userAccessToken
+     */
+    public static  void refreshToken(String userAccessToken){
+        String url = String.format(WxUtil.REFREDH_USER_ACCESSTOKEN,WxUtil.APPID,userAccessToken);
+        HttpRequest.get(url);
+    }
     /**
      * 获得模板ID
      * @param template_id_short 模板编号
@@ -251,18 +316,18 @@ public class WxUtil {
         }
         return stringBuffer.toString();
     }
-
     public static void main(String[] args) {
-        Map<String, DataValue> map = new HashMap<>();
-        map.put("sendTime",DataValue.builder().color("#173177").value(DateUtil.format(new Date(),"yyyy-MM-dd HH:mm:ss")).build());
-        map.put("toUserName",DataValue.builder().color("#173177").value("你最爱的猪猪").build());
-        map.put("formUserName",DataValue.builder().color("#173177").value("我最爱的大傻猪").build());
-        map.put("content",DataValue.builder().color("#173177").value("猪猪1314520").build());
-        SendTemplate sendTemplate =SendTemplate.builder()
-                .data(map)
-                .template_id("jUIM2mpS_9Jg94-_QH7cmEe1H7dCAmlX3aGAXRa3ZCA")
-                .touser("oyCVg1bMZa4UzRrx1QR7lMxGyZB8")
-                .build();
-        WxUtil.sendTemplate(sendTemplate);
+//        Map<String, DataValue> map = new HashMap<>();
+//        map.put("sendTime",DataValue.builder().color("#173177").value(DateUtil.format(new Date(),"yyyy-MM-dd HH:mm:ss")).build());
+//        map.put("sendName",DataValue.builder().color("#173177").value("咩咩").build());
+//        map.put("toUserName",DataValue.builder().color("#173177").value("猪猪").build());
+//        map.put("content",DataValue.builder().color("#173177").value("1314520").build());
+//        SendTemplate sendTemplate =SendTemplate.builder()
+//                .data(map)
+//                .template_id("Eyt7a6ZRSM0iliRoardbi2kS-hDyemzeiWeOo88geuw")
+//                .touser("oyCVg1bMZa4UzRrx1QR7lMxGyZB8")
+//                .build();
+//        WxUtil.sendTemplate(sendTemplate);
+        WxUtil.getUserInfo("oyCVg1bMZa4UzRrx1QR7lMxGyZB8");
     }
 }

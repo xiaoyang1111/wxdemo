@@ -1,6 +1,7 @@
 package com.example.demo.controller;
 
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
 import com.example.demo.entity.message.TextMessage;
 import com.example.demo.util.ShunTentWxUtil;
 import com.example.demo.util.WxUtil;
@@ -70,6 +71,18 @@ public class WxApiController {
         } catch (Exception e) {
             e.printStackTrace();
         }
+        return null;
+    }
+
+    /**
+     * 微信授权
+     * @param code
+     * @return
+     */
+    @GetMapping("wxUrl")
+    public String wxUrl(String code){
+        JSONObject jsonObject = WxUtil.getUserAccessToken(code);
+        WxUtil.getAuthUserInfo(jsonObject.getString("access_token"),jsonObject.getString("openid"));
         return null;
     }
 }

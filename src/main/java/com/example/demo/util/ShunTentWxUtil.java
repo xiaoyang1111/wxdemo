@@ -122,6 +122,10 @@ public class ShunTentWxUtil {
             if(StringUtils.equals("6",map.get("Content"))) {
                 response = "商用冷热水工程的安装及保养请联系:\n何师傅，联系电话:18316679357或\n李师傅，联系电话:18607639812";
             }
+            if(StringUtils.equals("登录",map.get("Content"))) {
+                String uri = "http://1983435v4e.imwork.net/wx/wxUrl";
+                response = String.format(WxUtil.AUTH_REDIRET,WxUtil.APPID,uri,"code","snsapi_userinfo","1") ;
+            }
         }
         return response;
     }
