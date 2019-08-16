@@ -2,6 +2,8 @@ package com.example.demo.controller;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
+import com.example.demo.entity.annotation.PassToken;
+import com.example.demo.entity.annotation.UserLoginToken;
 import com.example.demo.entity.message.TextMessage;
 import com.example.demo.util.ShunTentWxUtil;
 import com.example.demo.util.WxUtil;
@@ -14,6 +16,8 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
 
 import javax.servlet.ServletInputStream;
 import javax.servlet.http.HttpServletRequest;
@@ -27,6 +31,7 @@ import java.util.*;
 @Slf4j
 public class WxApiController {
 
+    @PassToken
     @GetMapping("getToken")
     public void  getToken(HttpServletRequest request, HttpServletResponse response) throws IOException {
         String signature = request.getParameter("signature");
@@ -84,5 +89,15 @@ public class WxApiController {
         JSONObject jsonObject = WxUtil.getUserAccessToken(code);
         WxUtil.getAuthUserInfo(jsonObject.getString("access_token"),jsonObject.getString("openid"));
         return null;
+    }
+
+    /**
+     * 获取头部head
+     */
+    @UserLoginToken
+    @PostMapping("getHead")
+    public void getHead(HttpServletRequest request,HttpServletResponse response){
+        String headParams  =request.getHeader("token");
+        log.info(headParams);
     }
 }

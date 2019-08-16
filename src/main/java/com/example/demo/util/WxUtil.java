@@ -4,6 +4,10 @@ import cn.hutool.core.date.DateUtil;
 import com.alibaba.druid.util.StringUtils;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
+import com.auth0.jwt.JWT;
+import com.auth0.jwt.algorithms.Algorithm;
+import com.auth0.jwt.interfaces.DecodedJWT;
+import com.example.demo.entity.WxUserInfo.User;
 import com.example.demo.entity.menu.MenuButton;
 import com.example.demo.entity.template.DataValue;
 import com.example.demo.entity.template.SendTemplate;
@@ -81,15 +85,17 @@ public class WxUtil {
     /**
      * 获取用户accessToken
      */
-    public static String GET_USER_ACCESS_TOKEN ="https://api.weixin.qq.com/sns/oauth2/access_token?appid=%s&secret=%s&code=%s&grant_type=authorization_code";
+    public static String GET_USER_ACCESS_TOKEN = "https://api.weixin.qq.com/sns/oauth2/access_token?appid=%s&secret=%s&code=%s&grant_type=authorization_code";
     /**
      * 获取网页授权用户基本信息
      */
-    public static  String GET_AUTH_USERINFO = "https://api.weixin.qq.com/sns/userinfo?access_token=%s&openid=%s&lang=zh_CN";
+    public static String GET_AUTH_USERINFO = "https://api.weixin.qq.com/sns/userinfo?access_token=%s&openid=%s&lang=zh_CN";
+
     /**
      * 刷新用户accesstoken
      */
-    public static  String REFREDH_USER_ACCESSTOKEN = "https://api.weixin.qq.com/sns/oauth2/refresh_token?appid=%s&grant_type=refresh_token&refresh_token=%s";
+    public static String REFREDH_USER_ACCESSTOKEN = "https://api.weixin.qq.com/sns/oauth2/refresh_token?appid=%s&grant_type=refresh_token&refresh_token=%s";
+
     /**
      * 获取accesstoken
      *
@@ -158,16 +164,16 @@ public class WxUtil {
     /**
      * 设置所属行业
      */
-    public static Boolean setIndustry(Map<String,String> map) {
+    public static Boolean setIndustry(Map<String, String> map) {
         Boolean flat = false;
-        log.info("setIndustryRequest:"+JSON.toJSONString(map));
+        log.info("setIndustryRequest:" + JSON.toJSONString(map));
         String url = String.format(API_SET_INDUSTRY, WxUtil.getAccessToken());
         HttpRequest httpRequest = HttpRequest.post(url);
         httpRequest.send(JSON.toJSONString(map));
         String result = httpRequest.body();
         JSONObject jsonObject = JSON.parseObject(result);
         System.out.println("setIndustryResponse:" + JSON.toJSONString(jsonObject));
-        if(StringUtils.equals("ok",jsonObject.getString("msg"))){
+        if (StringUtils.equals("ok", jsonObject.getString("msg"))) {
             flat = true;
         }
         return flat;
@@ -175,26 +181,28 @@ public class WxUtil {
 
     /**
      * 获取设置的行业信息
+     *
      * @return
      */
-    public static String getIndustry(){
-      String url =  String.format(GET_INDUSTRY,WxUtil.getAccessToken());
-      HttpRequest httpRequest = HttpRequest.get(url);
-      String result = httpRequest.body();
-      JSONObject jsonObject = JSON.parseObject(result);
-      log.info("get_industrResponse:"+JSON.toJSONString(jsonObject));
-      return result;
+    public static String getIndustry() {
+        String url = String.format(GET_INDUSTRY, WxUtil.getAccessToken());
+        HttpRequest httpRequest = HttpRequest.get(url);
+        String result = httpRequest.body();
+        JSONObject jsonObject = JSON.parseObject(result);
+        log.info("get_industrResponse:" + JSON.toJSONString(jsonObject));
+        return result;
     }
 
     /**
      * 获取用户基本信息
+     *
      * @return
      */
-    public static String getUserInfo(String oppenId){
-        String url = String.format(GET_USERINFO,WxUtil.getAccessToken(),oppenId,"zh_CN");
+    public static String getUserInfo(String oppenId) {
+        String url = String.format(GET_USERINFO, WxUtil.getAccessToken(), oppenId, "zh_CN");
         String result = HttpRequest.get(url).body();
         JSONObject jsonObject = JSON.parseObject(result);
-        log.info("getUserInfoResponse:"+JSON.toJSONString(jsonObject));
+        log.info("getUserInfoResponse:" + JSON.toJSONString(jsonObject));
         return null;
 
     }
@@ -202,21 +210,23 @@ public class WxUtil {
     /**
      * 拉取用户信息(网页授权）
      */
-    public static void   getAuthUserInfo(String accessToken,String oppenId){
-        String url = String.format(GET_AUTH_USERINFO,accessToken,oppenId);
+    public static void getAuthUserInfo(String accessToken, String oppenId) {
+        String url = String.format(GET_AUTH_USERINFO, accessToken, oppenId);
         String result = HttpRequest.get(url).body();
-        log.info("getAuthUserInfoResponse:"+JSON.toJSONString(result));
+        log.info("getAuthUserInfoResponse:" + JSON.toJSONString(result));
     }
+
     /**
      * 获取用户accessToken
+     *
      * @param code
      * @return
      */
-    public static  JSONObject getUserAccessToken(String code){
-        String url = String.format(GET_USER_ACCESS_TOKEN,WxUtil.APPID,WxUtil.APPSECRET,code);
+    public static JSONObject getUserAccessToken(String code) {
+        String url = String.format(GET_USER_ACCESS_TOKEN, WxUtil.APPID, WxUtil.APPSECRET, code);
         String result = HttpRequest.get(url).body();
-        JSONObject jsonObject =JSON.parseObject(result);
-        log.info("getUserAccessTokenResponse:"+JSON.toJSONString(result));
+        JSONObject jsonObject = JSON.parseObject(result);
+        log.info("getUserAccessTokenResponse:" + JSON.toJSONString(result));
         //刷新accessToken
         WxUtil.refreshToken(jsonObject.getString("refresh_token"));
         return jsonObject;
@@ -224,46 +234,50 @@ public class WxUtil {
 
     /**
      * 刷新用accessToken
+     *
      * @param userAccessToken
      */
-    public static  void refreshToken(String userAccessToken){
-        String url = String.format(WxUtil.REFREDH_USER_ACCESSTOKEN,WxUtil.APPID,userAccessToken);
+    public static void refreshToken(String userAccessToken) {
+        String url = String.format(WxUtil.REFREDH_USER_ACCESSTOKEN, WxUtil.APPID, userAccessToken);
         HttpRequest.get(url);
     }
+
     /**
      * 获得模板ID
+     *
      * @param template_id_short 模板编号
      * @return
      */
-    public static String getTemplate(String template_id_short){
-        String url =  String.format(API_ADD_TEMPLATE,WxUtil.getAccessToken());
+    public static String getTemplate(String template_id_short) {
+        String url = String.format(API_ADD_TEMPLATE, WxUtil.getAccessToken());
         HttpRequest httpRequest = HttpRequest.post(url);
         JSONObject jsonObject = new JSONObject();
-        jsonObject.put("template_id_short",template_id_short);
-        log.info("getTemplateResquest:"+JSON.toJSONString(jsonObject));
+        jsonObject.put("template_id_short", template_id_short);
+        log.info("getTemplateResquest:" + JSON.toJSONString(jsonObject));
         httpRequest.send(JSON.toJSONString(jsonObject));
         String result = httpRequest.body();
         JSONObject jsonObject1 = JSON.parseObject(result);
-        log.info("getTemplateREsponse:"+JSON.toJSONString(jsonObject1));
-        String templateId =jsonObject1.getString(template_id_short);
+        log.info("getTemplateREsponse:" + JSON.toJSONString(jsonObject1));
+        String templateId = jsonObject1.getString(template_id_short);
         return templateId;
     }
 
     /**
      * 发送模板消息
+     *
      * @return
      */
-    public static Boolean sendTemplate(SendTemplate sendTemplate){
+    public static Boolean sendTemplate(SendTemplate sendTemplate) {
         Boolean flat = false;
-        String url =  String.format(SEND_TM_MESSAGE,WxUtil.getAccessToken());
-        log.info("sendTemplateRequest:"+JSON.toJSONString(sendTemplate));
+        String url = String.format(SEND_TM_MESSAGE, WxUtil.getAccessToken());
+        log.info("sendTemplateRequest:" + JSON.toJSONString(sendTemplate));
         HttpRequest httpRequest = HttpRequest.post(url);
 
         httpRequest.send(JSON.toJSONString(sendTemplate));
         String result = httpRequest.body();
-        log.info("sendTemplateResponse:"+JSON.toJSONString(result));
+        log.info("sendTemplateResponse:" + JSON.toJSONString(result));
         JSONObject jsonObject = JSON.parseObject(result);
-        if(StringUtils.equals("ok",jsonObject.getString("errmsg"))){
+        if (StringUtils.equals("ok", jsonObject.getString("errmsg"))) {
             flat = true;
         }
         return flat;
@@ -271,13 +285,15 @@ public class WxUtil {
 
     /**
      * 获取模板列表
+     *
      * @return
      */
-    public static TemplateList getTemplateList(){
-      String url =  String.format(GET_ALL_PRIVATE,getAccessToken());
-      String result = HttpRequest.get(url).body();
-      return (TemplateList) JSON.toJSON(result);
+    public static TemplateList getTemplateList() {
+        String url = String.format(GET_ALL_PRIVATE, getAccessToken());
+        String result = HttpRequest.get(url).body();
+        return (TemplateList) JSON.toJSON(result);
     }
+
     /**
      * sha1算法计算摘要
      *
@@ -316,18 +332,20 @@ public class WxUtil {
         }
         return stringBuffer.toString();
     }
+
+    public static String getToken(User user) {
+        String token="";
+        token= JWT.create().withAudience(user.getId(),user.getOppenId())
+                .sign(Algorithm.HMAC256(user.getPassword()));
+        return token;
+    }
     public static void main(String[] args) {
-//        Map<String, DataValue> map = new HashMap<>();
-//        map.put("sendTime",DataValue.builder().color("#173177").value(DateUtil.format(new Date(),"yyyy-MM-dd HH:mm:ss")).build());
-//        map.put("sendName",DataValue.builder().color("#173177").value("咩咩").build());
-//        map.put("toUserName",DataValue.builder().color("#173177").value("猪猪").build());
-//        map.put("content",DataValue.builder().color("#173177").value("1314520").build());
-//        SendTemplate sendTemplate =SendTemplate.builder()
-//                .data(map)
-//                .template_id("Eyt7a6ZRSM0iliRoardbi2kS-hDyemzeiWeOo88geuw")
-//                .touser("oyCVg1bMZa4UzRrx1QR7lMxGyZB8")
-//                .build();
-//        WxUtil.sendTemplate(sendTemplate);
-        WxUtil.getUserInfo("oyCVg1bMZa4UzRrx1QR7lMxGyZB8");
+        User user = User.builder().id("123456").oppenId("qwerd").password("1234")
+                .username("xiao").build();
+        String token = WxUtil.getToken(user);
+        DecodedJWT decode =  JWT.decode(token);
+        List<String> strings = decode.getAudience();
+        log.info(JSON.toJSONString(token));
+
     }
 }
