@@ -44,7 +44,6 @@ public class WxApiController {
             printWriter.flush();
             printWriter.close();
         }
-        System.out.println("get");
     }
     @PostMapping(value = "getToken",produces = "application/xml; charset=utf-8")
     public String  getToken1(HttpServletRequest request, HttpServletResponse response){
